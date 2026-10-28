@@ -1,0 +1,50 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - revive
+    - gocritic
+    - errorlint
+    - wrapcheck
+    - bodyclose
+    - noctx
+    - sqlclosecheck
+    - unused
+    - ineffassign
+  settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+    wrapcheck:
+      ignore-sigs:
+        - .Errorf(
+        - errors.New(
+        - errors.Unwrap(
+        - errors.Join(
+        - (log/slog.Handler).Handle(
+      ignore-interface-regexps:
+        - ^TxManager$
+      ignore-package-globs:
+        - github.com/lapp-coder/task-manager-service/*
+        - github.com/sony/gobreaker/*
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - wrapcheck
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/lapp-coder/task-manager-service
