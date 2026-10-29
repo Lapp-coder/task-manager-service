@@ -1,8 +1,12 @@
 LINT_VERSION := v2.15.0
 ENV_FILE ?= .env
 COMPOSE := docker compose --env-file $(ENV_FILE)
+APP_IMAGE ?= task-manager-service:local
+PLACEHOLDER_ENV := MYSQL_USER=- MYSQL_PASSWORD=- MYSQL_DATABASE=- MYSQL_ROOT_PASSWORD=- JWT_SECRET=-
 
-.PHONY: build test test-integration lint up down logs migrate
+export APP_IMAGE
+
+.PHONY: build test test-integration lint up down logs clean migrate
 
 build:
 	go build -o bin/server ./cmd/server
@@ -34,6 +38,11 @@ down:
 
 logs:
 	$(COMPOSE) logs -f app
+
+clean:
+	$(PLACEHOLDER_ENV) docker compose down --volumes --remove-orphans
+	@if docker image inspect $(APP_IMAGE) >/dev/null 2>&1; then docker image rm $(APP_IMAGE); fi
+	rm -rf bin $(ENV_FILE)
 
 migrate:
 	go run ./cmd/migrate up

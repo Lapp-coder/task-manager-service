@@ -56,7 +56,7 @@ services:
       retries: 30
 
   migrate:
-    image: task-manager-service:local
+    image: ${APP_IMAGE:-task-manager-service:local}
     build: .
     entrypoint: ["/app/migrate", "up"]
     environment: *app-env
@@ -65,7 +65,7 @@ services:
         condition: service_healthy
 
   app:
-    image: task-manager-service:local
+    image: ${APP_IMAGE:-task-manager-service:local}
     build: .
     environment: *app-env
     ports:
