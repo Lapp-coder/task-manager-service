@@ -7,19 +7,29 @@ REST API для управления задачами внутри команд:
 
 ## Быстрый старт
 
-```bash
-cp .env.example .env
-```
-
-Заполните в `.env` пустые секреты: `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `JWT_SECRET` (не короче 32 байт,
-например `openssl rand -hex 32`). Затем:
+Нужны Docker с Compose v2, `make` и `openssl`. Запуск одной командой:
 
 ```bash
-docker compose up --build -d
+make up
 ```
 
-Compose поднимает MySQL и Redis, дожидается их healthcheck, применяет миграции одноразовым сервисом
-`migrate` и запускает приложение на `http://localhost:8080`.
+Если `.env` еще нет, команда создает его из `.env.example` и генерирует секреты `MYSQL_PASSWORD`,
+`MYSQL_ROOT_PASSWORD` и `JWT_SECRET`. Существующий `.env` не перезаписывается, поэтому свои значения можно
+задать заранее. Дальше Compose собирает образ, поднимает MySQL и Redis, дожидается их healthcheck, применяет
+миграции одноразовым сервисом `migrate` и запускает приложение. Команда завершается, когда все сервисы готовы,
+и печатает адрес Swagger UI.
+
+| Команда | Действие |
+| --- | --- |
+| `make up` | собрать и запустить стек (повторный вызов пересобирает приложение) |
+| `make logs` | логи приложения |
+| `make down` | остановить стек, данные MySQL сохраняются в volume |
+| `docker compose down -v` | остановить и удалить данные |
+
+Если порты `8080`, `3306` или `6379` заняты, поменяйте `HTTP_PUBLISHED_PORT`, `MYSQL_PUBLISHED_PORT`
+и `REDIS_PUBLISHED_PORT` в `.env`.
+
+После запуска сервис доступен на `http://localhost:8080`.
 
 | URL | Назначение |
 | --- | --- |
@@ -32,6 +42,7 @@ Compose поднимает MySQL и Redis, дожидается их healthcheck
 ### Локальный запуск без контейнера приложения
 
 ```bash
+make .env
 docker compose up -d mysql redis
 set -a; source .env; set +a
 make migrate
